@@ -53,10 +53,14 @@ jobs:
       - name: Patch TF Lite
         run: |
           cd tensorflow_src
+          echo "Checking for: $env:ALL_PATCH_PATH"
           if ( Test-Path -Path $env:ALL_PATCH_PATH ) {
+            echo "Applying: $env:ALL_PATCH_PATH"
             git apply "$env:ALL_PATCH_PATH"
           }
+          echo "Checking for: $env:PLATFORM_PATCH_PATH"
           if ( Test-Path -Path $env:PLATFORM_PATCH_PATH ) {
+            echo "Applying: $env:PLATFORM_PATCH_PATH"
             git apply "$env:PLATFORM_PATCH_PATH"
           }
 
