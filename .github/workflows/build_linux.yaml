@@ -12,7 +12,7 @@ on:
       TF_VERSION:
         description: 'Enter the tensorflow branch name on which the TF Lite binaries should be built.'
         required: true
-        default: "r2.8"
+        default: "v2.17.0"
       BUILD_OPTIONS:
         description: 'Enter the build options with which TF Lite binaries should be built.'
         required: false
@@ -49,7 +49,7 @@ jobs:
       run: ls -a tflite_build/
           
     - name: Upload TF Lite build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: libtensorflowlite_c-linux.so
         path: tflite_build/libtensorflowlite_c.so

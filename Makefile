@@ -12,7 +12,6 @@ build-setup:
 	cd tflite_build; \
 	cmake ../tensorflow_src/tensorflow/lite/c $(DELEGATES)
 
-
 mac-x86-64:
 	cd tflite_build; \
 	CMAKE_OSX_ARCHITECTURES=x86_64 cmake --build . -j ;\
@@ -43,6 +42,5 @@ mac:
 	$(MAKE) mac-merge-universal
 
 test:
-	
 	$(MAKE) clean
 	$(MAKE) build-setup

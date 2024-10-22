@@ -21,7 +21,7 @@ on:
       TF_VERSION:
         description: 'Enter the tensorflow branch name on which the TF Lite binaries should be built.'
         required: true
-        default: "r2.8"
+        default: "v2.17.0"
       BUILD_OPTIONS:
         description: 'Enter the build options with which TF Lite binaries should be built.'
         required: false
@@ -36,14 +36,26 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      
-    - name: Download and setup tensorflow
+    - name: Get TensorFlow
+      uses: actions/checkout@v4
+      with:
+        repository: tensorflow/tensorflow
+        path: tensorflow_src
+        ref: ${{ github.event.inputs.TF_VERSION }}
+
+    - name: Get patches
+      uses: actions/checkout@v4
+      if: ${{ hashFiles(patches/${{ github.event.inputs.TF_VERSION }}.patch) != '' }}
+      ref: ${{ github.ref }}
+      path: tflite-binaries
+
+    - name: Patch TF Lite
+      if: ${{ hashFiles(patches/${{ github.event.inputs.TF_VERSION }}.patch) != '' }}
       run: |
-        git clone https://github.com/tensorflow/tensorflow tensorflow_src
         cd tensorflow_src
-        git checkout ${{ github.event.inputs.TF_VERSION }}
-        cd ..
-    
+        PATCH_PATH=../tflite-binaries/patches/${{ github.event.inputs.TF_VERSION }}.patch
+        [ -f ${PATCH_PATH} ] && git apply ${PATCH_PATH}
+
     - name: Build TF Lite
       run: |
         mkdir tflite_build
@@ -55,8 +67,7 @@ jobs:
       run: ls tflite_build/
           
     - name: Upload TF Lite build 
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: tensorflowlite_c-win.dll
         path: tflite_build/Release/tensorflowlite_c.dll
-
