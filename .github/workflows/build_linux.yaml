@@ -1,55 +1,61 @@
-
 # This is a basic workflow to help you get started with Actions
 
 name: Build TF Lite for Linux
 
 # Controls when the workflow will run
 on:
+  workflow_call:
+    inputs:
+      TF_VERSION:
+        type: string
+        required: true
+      BUILD_OPTIONS:
+        type: string
+        required: false
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
       TF_VERSION:
-        description: 'Enter the tensorflow branch name on which the TF Lite binaries should be built.'
+        description: "Enter the tensorflow branch name on which the TF Lite binaries should be built."
         required: true
         default: "v2.17.0"
       BUILD_OPTIONS:
-        description: 'Enter the build options with which TF Lite binaries should be built.'
+        description: "Enter the build options with which TF Lite binaries should be built."
         required: false
         default: "-DTFLITE_ENABLE_XNNPACK=ON -DTFLITE_ENABLE_GPU=ON"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-      
- # This workflow contains a single job called "build"
+  # This workflow contains a single job called "build"
   build-linux:
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    #- name: Install packages
-    #  run: sudo apt-get install build-essential cmake
-      
-    - name: Download and setup tensorflow
-      run: |
-        git clone https://github.com/tensorflow/tensorflow tensorflow_src
-        cd tensorflow_src
-        git checkout ${{ github.event.inputs.TF_VERSION }}
-        cd ..
-    
-    - name: Build TF Lite
-      run: |
-        mkdir tflite_build
-        cd tflite_build
-        cmake ../tensorflow_src/tensorflow/lite/c ${{ github.event.inputs.BUILD_OPTIONS }}
-        cmake --build .
-        
-    - name: output CWD
-      run: ls -a tflite_build/
-          
-    - name: Upload TF Lite build
-      uses: actions/upload-artifact@v4
-      with:
-        name: libtensorflowlite_c-linux.so
-        path: tflite_build/libtensorflowlite_c.so
+      #- name: Install packages
+      #  run: sudo apt-get install build-essential cmake
+
+      - name: Get TensorFlow
+        uses: actions/checkout@v4
+        with:
+          repository: tensorflow/tensorflow
+          path: tensorflow_src
+          ref: ${{ github.event.inputs.TF_VERSION }}
+
+      - name: Build TF Lite
+        run: |
+          mkdir tflite_build
+          cd tflite_build
+          cmake ../tensorflow_src/tensorflow/lite/c ${{ github.event.inputs.BUILD_OPTIONS }}
+          cmake --build .
+
+      - name: output CWD
+        run: ls -a tflite_build/
+
+      - name: Upload TF Lite build
+        uses: actions/upload-artifact@v4
+        with:
+          name: libtensorflowlite_c-linux.so
+          path: tflite_build/libtensorflowlite_c.so
