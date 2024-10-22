@@ -51,7 +51,6 @@ jobs:
           path: tflite-binaries
 
       - name: Patch TF Lite
-        if: ${{ (hashFiles(env.PLATFORM_PATCH_PATH) != '') || (hashFiles(env.ALL_PATCH_PATH) != '') }}
         run: |
           cd tensorflow_src
           if ( Test-Path -Path $env:ALL_PATCH_PATH ) {
