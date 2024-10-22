@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Build TF Lite for windows
+name: Build TF Lite for Windows
 
 # Controls when the workflow will run
 on:
@@ -17,11 +17,11 @@ on:
   workflow_dispatch:
     inputs:
       TF_VERSION:
-        description: "Enter the tensorflow branch name on which the TF Lite binaries should be built."
+        description: "TensorFlow Git ref to build."
         required: true
         default: "v2.17.0"
       BUILD_OPTIONS:
-        description: "Enter the build options with which TF Lite binaries should be built."
+        description: "CMake build options."
         required: false
         default: "-DTFLITE_ENABLE_XNNPACK=ON -DTFLITE_ENABLE_GPU=ON"
 
@@ -46,7 +46,6 @@ jobs:
 
       - name: Get patches
         uses: actions/checkout@v4
-        if: ${{ (hashFiles(env.PLATFORM_PATCH_PATH) != '') || (hashFiles(env.ALL_PATCH_PATH) != '') }}
         with:
           ref: ${{ github.ref }}
           path: tflite-binaries

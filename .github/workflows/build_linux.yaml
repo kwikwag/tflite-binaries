@@ -17,11 +17,11 @@ on:
   workflow_dispatch:
     inputs:
       TF_VERSION:
-        description: "Enter the tensorflow branch name on which the TF Lite binaries should be built."
+        description: "TensorFlow Git ref to build."
         required: true
         default: "v2.17.0"
       BUILD_OPTIONS:
-        description: "Enter the build options with which TF Lite binaries should be built."
+        description: "CMake build options."
         required: false
         default: "-DTFLITE_ENABLE_XNNPACK=ON -DTFLITE_ENABLE_GPU=ON"
 
