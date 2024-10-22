@@ -25,7 +25,7 @@ on:
       BUILD_OPTIONS:
         description: 'Enter the build options with which TF Lite binaries should be built.'
         required: false
-        default: "-DTFLITE_ENABLE_XNNPACK=ON -DTFLITE_ENABLE_GPU=ON"
+        default: "-DTFLITE_ENABLE_XNNPACK=ON -DTFLITE_ENABLE_GPU=ON -DMAKE_CXX_STANDARD=20"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -42,19 +42,6 @@ jobs:
         repository: tensorflow/tensorflow
         path: tensorflow_src
         ref: ${{ github.event.inputs.TF_VERSION }}
-
-    - name: Get patches
-      uses: actions/checkout@v4
-      if: ${{ hashFiles(patches/${{ github.event.inputs.TF_VERSION }}.patch) != '' }}
-      ref: ${{ github.ref }}
-      path: tflite-binaries
-
-    - name: Patch TF Lite
-      if: ${{ hashFiles(patches/${{ github.event.inputs.TF_VERSION }}.patch) != '' }}
-      run: |
-        cd tensorflow_src
-        PATCH_PATH=../tflite-binaries/patches/${{ github.event.inputs.TF_VERSION }}.patch
-        [ -f ${PATCH_PATH} ] && git apply ${PATCH_PATH}
 
     - name: Build TF Lite
       run: |
