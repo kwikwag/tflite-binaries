@@ -11,3 +11,37 @@ index b589d1ab8de..4934088e8da 100644
  
  if(CMAKE_SYSTEM_NAME MATCHES "Windows"
      AND (MSVC AND (CMAKE_SIZEOF_VOID_P EQUAL 4)))
+diff --git a/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc b/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc
+index c4331e099a2..928e0c01148 100644
+--- a/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc
++++ b/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc
+@@ -274,8 +274,9 @@ void Avx2MatrixBatchVectorMultiplyAccumulateImpl(
+       // Horizontally add the 4 intermediate sum values to get the final
+       // dot-prod value for this row.
+       int32_t sum = ReduceInt32x4(dotprod_32x4);
+-
++#ifdef __clang__
+ #pragma clang loop unroll(disable) vectorize(disable)
++#endif
+       // Postamble loop for <4x remaining 8-bit inputs.
+       for (; col < m_cols; ++col) {
+         sum += row_ptr[col] * vectors[col];
+diff --git a/tensorflow/lite/minimal_logging_default.cc b/tensorflow/lite/minimal_logging_default.cc
+index 72632174a54..c36ee9cf21d 100644
+--- a/tensorflow/lite/minimal_logging_default.cc
++++ b/tensorflow/lite/minimal_logging_default.cc
+@@ -34,10 +34,14 @@ void MinimalLogger::LogFormatted(LogSeverity severity, const char* format,
+                                  va_list args) {
+   if (severity >= MinimalLogger::minimum_log_severity_) {
+     fprintf(stderr, "%s: ", GetSeverityName(severity));
++#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wformat-nonliteral"
++#endif
+     vfprintf(stderr, format, args);
++#ifdef __clang__
+ #pragma clang diagnostic pop
++#endif
+     fputc('\n', stderr);
+   }
+ }
