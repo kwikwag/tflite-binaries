@@ -508,6 +508,61 @@ index 362be8c865e..1a6881d1f59 100644
      };
      EXPECT_EQ(NnApiImplementation()->ANeuralNetworksModel_addOperand(
                    model, &operand_type),
+diff --git a/tensorflow/lite/delegates/xnnpack/weight_cache.cc b/tensorflow/lite/delegates/xnnpack/weight_cache.cc
+index aa7307386ff..dde774840ae 100644
+--- a/tensorflow/lite/delegates/xnnpack/weight_cache.cc
++++ b/tensorflow/lite/delegates/xnnpack/weight_cache.cc
+@@ -203,15 +203,15 @@ BufferLocation WeightCacheBuilder::Append(PackIdentifier pack_id,
+     std::memcpy(reserved_data, data, size);
+     append_data = reserved_data;
+   }
+-  BufferLocation loc{.offset = reinterpret_cast<uintptr_t>(append_data) -
++  BufferLocation loc{/*offset=*/reinterpret_cast<uintptr_t>(append_data) -
+                                reinterpret_cast<uintptr_t>(buffer_data_.data()),
+-                     .size = size};
++                     /*size=*/size};
+   schema_.buffers.push_back(std::make_unique<cache::schema::BufferT>(
+-      cache::schema::BufferT{.packing_algorithm_id = pack_id.pack_algorithm_id,
+-                             .weights_id = pack_id.weights_id,
+-                             .bias_id = pack_id.bias_id,
+-                             .offset = loc.offset,
+-                             .size = loc.size}));
++      cache::schema::BufferT{/*packing_algorithm_id=*/pack_id.pack_algorithm_id,
++                             /*weights_id=*/pack_id.weights_id,
++                             /*bias_id=*/pack_id.bias_id,
++                             /*offset=*/loc.offset,
++                             /*size=*/loc.size}));
+   return loc;
+ }
+ 
+@@ -377,10 +377,10 @@ bool MMapWeightCacheProvider::Load() {
+         return false;
+       }
+       cache_key_to_offset_.emplace(
+-          PackIdentifier{.pack_algorithm_id = buffer->packing_algorithm_id(),
+-                         .weights_id = buffer->weights_id(),
+-                         .bias_id = buffer->bias_id()},
+-          BufferLocation{.offset = buffer->offset(), .size = buffer->size()});
++          PackIdentifier{/*pack_algorithm_id=*/buffer->packing_algorithm_id(),
++                         /*weights_id=*/buffer->weights_id(),
++                         /*bias_id=*/buffer->bias_id()},
++          BufferLocation{/*offset=*/buffer->offset(), /*size=*/buffer->size()});
+     }
+   }
+   return true;
+@@ -515,9 +515,9 @@ PackIdentifier MMapWeightCacheProvider::BuildPackIdentifier(
+     }
+     return PackIdentifier::kNoId;
+   };
+-  return PackIdentifier{.pack_algorithm_id = key.seed,
+-                        .weights_id = get_buffer_id(key.kernel),
+-                        .bias_id = get_buffer_id(key.bias)};
++  return PackIdentifier{/*pack_algorithm_id=*/key.seed,
++                        /*weights_id=*/get_buffer_id(key.kernel),
++                        /*bias_id=*/get_buffer_id(key.bias)};
+ }
+ 
+ }  // namespace tflite::xnnpack
 diff --git a/tensorflow/lite/delegates/xnnpack/weight_cache.h b/tensorflow/lite/delegates/xnnpack/weight_cache.h
 index 0eb66308a37..71780650515 100644
 --- a/tensorflow/lite/delegates/xnnpack/weight_cache.h
@@ -914,6 +969,289 @@ index 001fd6f761d..09c84c5880c 100644
 +  test<ElementType::kSI32, ElementType::kF32>({/*scale=*/0.1, /*zero_point=*/0},
                                                {3}, {0, 1, 1}, {-3, 0, 3},
                                                {1, 1, 2}, {0, 1, 2});
+ }
+diff --git a/tensorflow/lite/experimental/shlo/legacy/test/compare_test.cc b/tensorflow/lite/experimental/shlo/legacy/test/compare_test.cc
+index 217ea28424f..a77fbe53fa3 100644
+--- a/tensorflow/lite/experimental/shlo/legacy/test/compare_test.cc
++++ b/tensorflow/lite/experimental/shlo/legacy/test/compare_test.cc
+@@ -226,224 +226,224 @@ TEST(Compare, Unquantized) {
+ 
+ TEST(Compare, Quantized) {
+   test<ElementType::kSI8, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kEQ,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kEQ,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, false, true});
+   test<ElementType::kSI8, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kEQ,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kEQ,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, false, true});
+   test<ElementType::kSI8, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kEQ,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kEQ,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, false, true});
+   test<ElementType::kSI16, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kEQ,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kEQ,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, false, true});
+   test<ElementType::kSI16, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kEQ,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kEQ,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, false, true});
+   test<ElementType::kSI16, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kEQ,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kEQ,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, false, true});
+   test<ElementType::kSI32, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kEQ,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kEQ,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, false, true});
+   test<ElementType::kSI32, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kEQ,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kEQ,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, false, true});
+   test<ElementType::kSI32, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kEQ,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kEQ,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, false, true});
+ 
+   test<ElementType::kSI8, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kNE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kNE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, true, false});
+   test<ElementType::kSI8, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kNE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kNE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, true, false});
+   test<ElementType::kSI8, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kNE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kNE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, true, false});
+   test<ElementType::kSI16, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kNE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kNE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, true, false});
+   test<ElementType::kSI16, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kNE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kNE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, true, false});
+   test<ElementType::kSI16, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kNE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kNE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, true, false});
+   test<ElementType::kSI32, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kNE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kNE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, true, false});
+   test<ElementType::kSI32, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kNE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kNE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, true, false});
+   test<ElementType::kSI32, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kNE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kNE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, true, false});
+ 
+   test<ElementType::kSI8, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, true, true});
+   test<ElementType::kSI8, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, true, true});
+   test<ElementType::kSI8, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, true, true});
+   test<ElementType::kSI16, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, true, true});
+   test<ElementType::kSI16, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, true, true});
+   test<ElementType::kSI16, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, true, true});
+   test<ElementType::kSI32, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, true, true});
+   test<ElementType::kSI32, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, true, true});
+   test<ElementType::kSI32, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, false, true, true});
+ 
+   test<ElementType::kSI8, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, false, true, false});
+   test<ElementType::kSI8, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, false, true, false});
+   test<ElementType::kSI8, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, false, true, false});
+   test<ElementType::kSI16, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, false, true, false});
+   test<ElementType::kSI16, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, false, true, false});
+   test<ElementType::kSI16, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, false, true, false});
+   test<ElementType::kSI32, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, false, true, false});
+   test<ElementType::kSI32, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, false, true, false});
+   test<ElementType::kSI32, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kGT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kGT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, false, true, false});
+ 
+   test<ElementType::kSI8, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, true, false, true});
+   test<ElementType::kSI8, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, true, false, true});
+   test<ElementType::kSI8, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, true, false, true});
+   test<ElementType::kSI16, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, true, false, true});
+   test<ElementType::kSI16, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, true, false, true});
+   test<ElementType::kSI16, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, true, false, true});
+   test<ElementType::kSI32, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, true, false, true});
+   test<ElementType::kSI32, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, true, false, true});
+   test<ElementType::kSI32, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLE,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLE,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {true, true, false, true});
+ 
+   test<ElementType::kSI8, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, false, false});
+   test<ElementType::kSI8, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, false, false});
+   test<ElementType::kSI8, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, false, false});
+   test<ElementType::kSI16, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, false, false});
+   test<ElementType::kSI16, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, false, false});
+   test<ElementType::kSI16, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, false, false});
+   test<ElementType::kSI32, ElementType::kBF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, false, false});
+   test<ElementType::kSI32, ElementType::kF16>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, false, false});
+   test<ElementType::kSI32, ElementType::kF32>(
+-      {.scale = 0.1, .zero_point = 0}, ComparisonDirection::kLT,
++      {/*scale=*/0.1, /*zero_point=*/0}, ComparisonDirection::kLT,
+       CompareType::kFloat, {4}, {1, 0, 1, 0}, {1, 1, 0, 0},
+       {false, true, false, false});
  }
 diff --git a/tensorflow/lite/experimental/shlo/legacy/test/concatenate_test.cc b/tensorflow/lite/experimental/shlo/legacy/test/concatenate_test.cc
 index 3494ad9940a..98481b809b6 100644
@@ -3521,6 +3859,46 @@ index e9508573b9b..acd5f06fb13 100644
                                                        expressed_type, scale)}};
  
      const ExpressedT scale_inv = ExpressedT(1.0) / scale;
+diff --git a/tensorflow/lite/g3doc/guide/ops_custom.md b/tensorflow/lite/g3doc/guide/ops_custom.md
+index 4f7089aca4e..27fabef4a94 100644
+--- a/tensorflow/lite/g3doc/guide/ops_custom.md
++++ b/tensorflow/lite/g3doc/guide/ops_custom.md
+@@ -308,7 +308,7 @@ namespace my_namespace::my_custom_op {
+ 
+   const TfLiteRegistration* MyCustomOpRegistration() {
+     static const TfLiteRegistration my_custom_op {
+-      .registration_external = MyCustomOpRegistrationExternal();
++      /*registration_external=*/MyCustomOpRegistrationExternal();
+     };
+     return my_custom_op;
+   }
+@@ -345,7 +345,7 @@ const TfLiteRegistrationExternal* MyCustomOpRegistrationExternal() {
+ 
+ const TfLiteRegistration MyCustomOpRegistration() {
+   static const TfLiteRegistration my_custom_op {
+-    .registration_external = MyCustomOpRegistrationExternal();
++    /*registration_external=*/MyCustomOpRegistrationExternal();
+   };
+   return my_custom_op;
+ }
+@@ -423,7 +423,7 @@ namespace atan_op {
+ 
+   const TfLiteRegistration AtanOpRegistration() {
+     static const TfLiteRegistration atan_op {
+-      .registration_external = AtanOpRegistrationExternal();
++      /*registration_external=*/AtanOpRegistrationExternal();
+     };
+     return atan_op;
+   }
+@@ -485,7 +485,7 @@ const TfLiteRegistrationExternal* AtanOpRegistrationExternal() {
+ 
+ const TfLiteRegistration AtanOpRegistration() {
+   static const TfLiteRegistration atan_op {
+-    .registration_external = AtanOpRegistrationExternal();
++    /*registration_external=*/AtanOpRegistrationExternal();
+   };
+   return atan_op;
+ }
 diff --git a/tensorflow/lite/java/src/test/native/interpreter_test_jni.cc b/tensorflow/lite/java/src/test/native/interpreter_test_jni.cc
 index 17c32e6a6fe..43bd1087479 100644
 --- a/tensorflow/lite/java/src/test/native/interpreter_test_jni.cc
@@ -3602,6 +3980,40 @@ index 17c32e6a6fe..43bd1087479 100644
 +      /*flags=*/kTfLiteDelegateFlagsNone,
    };
    return reinterpret_cast<jlong>(&delegate);
+ }
+diff --git a/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc b/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc
+index c4331e099a2..928e0c01148 100644
+--- a/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc
++++ b/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc
+@@ -274,8 +274,9 @@ void Avx2MatrixBatchVectorMultiplyAccumulateImpl(
+       // Horizontally add the 4 intermediate sum values to get the final
+       // dot-prod value for this row.
+       int32_t sum = ReduceInt32x4(dotprod_32x4);
+-
++#ifdef __clang__
+ #pragma clang loop unroll(disable) vectorize(disable)
++#endif
+       // Postamble loop for <4x remaining 8-bit inputs.
+       for (; col < m_cols; ++col) {
+         sum += row_ptr[col] * vectors[col];
+diff --git a/tensorflow/lite/minimal_logging_default.cc b/tensorflow/lite/minimal_logging_default.cc
+index 72632174a54..c36ee9cf21d 100644
+--- a/tensorflow/lite/minimal_logging_default.cc
++++ b/tensorflow/lite/minimal_logging_default.cc
+@@ -34,10 +34,14 @@ void MinimalLogger::LogFormatted(LogSeverity severity, const char* format,
+                                  va_list args) {
+   if (severity >= MinimalLogger::minimum_log_severity_) {
+     fprintf(stderr, "%s: ", GetSeverityName(severity));
++#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wformat-nonliteral"
++#endif
+     vfprintf(stderr, format, args);
++#ifdef __clang__
+ #pragma clang diagnostic pop
++#endif
+     fputc('\n', stderr);
+   }
  }
 diff --git a/tensorflow/lite/mutable_op_resolver_test.cc b/tensorflow/lite/mutable_op_resolver_test.cc
 index 8622579a3c8..0e50e6491c0 100644
@@ -5143,38 +5555,4 @@ index acddf0d0de9..2e89bbd282e 100644
 +      /*inputs=*/CreateOpSignatureTensorSpecs(kTfLiteInt16),
    };
    EXPECT_EQ(GetBuiltinOperatorVersion(fake_op_sig), 2);
- }
-diff --git a/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc b/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc
-index c4331e099a2..928e0c01148 100644
---- a/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc
-+++ b/tensorflow/lite/kernels/internal/optimized/sse_tensor_utils.cc
-@@ -274,8 +274,9 @@ void Avx2MatrixBatchVectorMultiplyAccumulateImpl(
-       // Horizontally add the 4 intermediate sum values to get the final
-       // dot-prod value for this row.
-       int32_t sum = ReduceInt32x4(dotprod_32x4);
--
-+#ifdef __clang__
- #pragma clang loop unroll(disable) vectorize(disable)
-+#endif
-       // Postamble loop for <4x remaining 8-bit inputs.
-       for (; col < m_cols; ++col) {
-         sum += row_ptr[col] * vectors[col];
-diff --git a/tensorflow/lite/minimal_logging_default.cc b/tensorflow/lite/minimal_logging_default.cc
-index 72632174a54..c36ee9cf21d 100644
---- a/tensorflow/lite/minimal_logging_default.cc
-+++ b/tensorflow/lite/minimal_logging_default.cc
-@@ -34,10 +34,14 @@ void MinimalLogger::LogFormatted(LogSeverity severity, const char* format,
-                                  va_list args) {
-   if (severity >= MinimalLogger::minimum_log_severity_) {
-     fprintf(stderr, "%s: ", GetSeverityName(severity));
-+#ifdef __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wformat-nonliteral"
-+#endif
-     vfprintf(stderr, format, args);
-+#ifdef __clang__
- #pragma clang diagnostic pop
-+#endif
-     fputc('\n', stderr);
-   }
  }
